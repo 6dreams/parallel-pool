@@ -1,0 +1,33 @@
+{
+  "name": "6dreams/parallel-pool",
+  "description": "Presents parallel functionality as pool",
+  "type": "library",
+  "version": "1.0.0",
+  "license": "MIT",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=7.2",
+    "ext-parallel": "*",
+    "brlabrussia/parallel-stub": "1.1.1a"
+  },
+  "authors": [
+    {
+      "name": ".fry",
+      "email": "fry@6dreams.net"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "8.1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "SixDreams\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SixDreams\\Tests\\": "tests/"
+    }
+  }
+}
