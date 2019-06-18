@@ -21,7 +21,7 @@ class PoolTest extends TestCase
         $pool = new Pool(
             __DIR__ . '/../test_thread_bootstrap.php',
             2,
-            function (ThreadConfigInterface $config) {
+            static function (ThreadConfigInterface $config) {
                 Kernel::getInstance();
 
                 echo $config->getId() . "\n";

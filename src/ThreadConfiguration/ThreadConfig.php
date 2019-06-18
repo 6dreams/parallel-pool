@@ -6,15 +6,15 @@ namespace SixDreams\ThreadConfiguration;
 use parallel\Sync as Atomic;
 
 /**
- * Class ThreadConfiguration
+ * Default thread configuration.
  */
 class ThreadConfig implements ThreadConfigInterface
 {
-    /** @var Atomic */
-    private $flag;
+    /** @var Atomic|null */
+    protected $flag;
 
     /** @var int */
-    private $id;
+    protected $id;
 
     /**
      * Конструктор.

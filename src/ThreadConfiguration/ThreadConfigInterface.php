@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace SixDreams\ThreadConfiguration;
 
 /**
- * Class ThreadConfigInterface
+ * Thread configuration interface, sended in first argument in {@see Pool}'s closure.
  */
 interface ThreadConfigInterface
 {
