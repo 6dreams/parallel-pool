@@ -2,14 +2,13 @@
   "name": "6dreams/parallel-pool",
   "description": "Presents parallel functionality as pool",
   "type": "library",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.2",
-    "ext-parallel": "*",
-    "brlabrussia/parallel-stub": "1.1.1a"
+    "ext-parallel": "*"
   },
   "authors": [
     {
