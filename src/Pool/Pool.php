@@ -3,8 +3,8 @@ declare(strict_types = 1);
 
 namespace SixDreams\Pool;
 
-use parallel\Future;
 use parallel\Runtime;
+use SixDreams\Pool\DTO\ThreadContext;
 use SixDreams\ThreadConfiguration\ThreadConfig;
 use SixDreams\ThreadConfiguration\ThreadConfigInterface;
 
@@ -16,8 +16,8 @@ class Pool implements PoolInterface
     /** @var Runtime[] */
     protected $runtimes = [];
 
-    /** @var Future[][] */
-    protected $futures = [];
+    /** @var ThreadContext[][] */
+    protected $contexts = [];
 
     /** @var callable */
     protected $closure;
@@ -34,7 +34,7 @@ class Pool implements PoolInterface
         $this->closure = $threadFunction;
         for ($i = 0; $i < $size; $i++) {
             $this->runtimes[] = new Runtime($autoloader);
-            $this->futures[]  = [];
+            $this->contexts[] = [];
         }
     }
 
@@ -43,15 +43,15 @@ class Pool implements PoolInterface
      */
     public function submit(array $args): void
     {
-        foreach ($this->runtimes as $id => $runtime) {
-            if ($this->isFinished($this->futures[$id])) {
-                $this->run($id, $runtime, $args);
+        foreach (\array_keys($this->runtimes) as $id) {
+            if ($this->isFinished($this->contexts[$id])) {
+                $this->run($id, $args);
 
                 return;
             }
         }
 
-        $this->run(0, $this->runtimes[0], $args);
+        $this->run(0, $args);
     }
 
     /**
@@ -59,7 +59,7 @@ class Pool implements PoolInterface
      */
     public function collect(): bool
     {
-        foreach ($this->futures as &$future) {
+        foreach ($this->contexts as &$future) {
             if (!$this->isFinished($future)) {
                 return true;
             }
@@ -83,15 +83,20 @@ class Pool implements PoolInterface
     /**
      * Internal. Checks thread finish all jobs and remove them for queue.
      *
-     * @param Future[]|null $futures
+     * @param ThreadContext[]|null $contexts
      *
      * @return bool
      */
-    private function isFinished(array &$futures): bool
+    private function isFinished(array &$contexts): bool
     {
-        foreach ($futures as $idx => $future) {
-            if ($future->done() || $future->cancelled()) {
-                unset($futures[$idx]);
+        foreach ($contexts as $idx => $context) {
+            if ($context->finished()) {
+                unset($contexts[$idx]);
+                if ($context->hasError()) {
+                    $this->run($context->getIndex(), $context->getArgs());
+
+                    return false;
+                }
             } else {
                 return false;
             }
@@ -103,14 +108,17 @@ class Pool implements PoolInterface
     /**
      * Internal. Execute closure with arguments on selected runtime.
      *
-     * @param int     $id
-     * @param Runtime $runtime
-     * @param array   $args
+     * @param int   $id
+     * @param array $args
      */
-    private function run(int $id, Runtime $runtime, array &$args): void
+    private function run(int $id, array $args): void
     {
         \array_unshift($args, $this->createThreadConfig($id));
 
-        $this->futures[$id][] = $runtime->run($this->closure, $args);
+        $this->contexts[$id][] = new ThreadContext(
+            $id,
+            $this->runtimes[$id]->run($this->closure, $args),
+            $args
+        );
     }
 }
