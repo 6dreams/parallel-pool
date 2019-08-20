@@ -61,11 +61,11 @@ class Pool implements PoolInterface
     {
         foreach ($this->contexts as &$future) {
             if (!$this->isFinished($future)) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
