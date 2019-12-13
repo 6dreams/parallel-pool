@@ -46,20 +46,20 @@ class ThreadContext
     /**
      * Does execution finished with error.
      *
-     * @return bool
+     * @return \Throwable|null
      */
-    public function hasError(): bool
+    public function getError(): ?\Throwable
     {
         if ($this->future->cancelled()) {
-            return false;
+            return null;
         }
 
         try {
             $this->future->value();
 
-            return false;
+            return null;
         } catch (\Throwable $e) {
-            return true;
+            return $e;
         }
     }
 

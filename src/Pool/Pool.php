@@ -22,6 +22,9 @@ class Pool implements PoolInterface
     /** @var callable */
     protected $closure;
 
+    /** @var callable */
+    protected $errorHandler;
+
     /**
      * Constructor.
      *
@@ -36,6 +39,20 @@ class Pool implements PoolInterface
             $this->runtimes[] = new Runtime($autoloader);
             $this->contexts[] = [];
         }
+    }
+
+    /**
+     * Error handler.
+     *
+     * @param callable $callback
+     *
+     * @return Pool
+     */
+    public function withErrorCallback(callable $callback): Pool
+    {
+        $this->errorHandler = $callback;
+
+        return $this;
     }
 
     /**
@@ -92,7 +109,8 @@ class Pool implements PoolInterface
         foreach ($contexts as $idx => $context) {
             if ($context->finished()) {
                 unset($contexts[$idx]);
-                if ($context->hasError()) {
+                $error = $context->getError();
+                if ($error && (!$this->errorHandler || ($this->errorHandler && ($this->errorHandler)($error)))) {
                     $this->run($context->getIndex(), $context->getArgs());
 
                     return false;
